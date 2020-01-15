@@ -52,6 +52,9 @@ ADD_SOURCE_GROUP(Core)
 ADD_SOURCE_GROUP(IO)
 ADD_SOURCE_GROUP(Tutorial)
 ADD_SOURCE_GROUP(Visualization)
+
+find_package(pybind11 CONFIG)
+
 pybind11_add_module(${PACKAGE_NAME}
     ${PY_ALL_HEADER_FILES} ${PY_ALL_SOURCE_FILES}
 )
@@ -66,6 +69,35 @@ target_include_directories(${PACKAGE_NAME} SYSTEM PRIVATE
 if (BUILD_AZURE_KINECT)
     target_compile_definitions(${PACKAGE_NAME} PRIVATE BUILD_AZURE_KINECT)
 endif()
+
+if (BUILD_VISUALIZATION)
+    if (ENABLE_HEADLESS_RENDERING)
+        find_package(OSMesa REQUIRED)
+        include_directories(${OSMESA_INCLUDE_DIR})
+        target_link_libraries(${PACKAGE_NAME} PRIVATE ${OSMESA_LIBRARY})
+    else ()
+        find_package(OpenGL REQUIRED)
+        target_link_libraries(${PACKAGE_NAME} PRIVATE ${OPENGL_LIBRARIES})
+    endif ()
+
+    if (ENABLE_CONAN)
+        target_link_libraries(${PACKAGE_NAME} PRIVATE CONAN_PKG::tinyfd)
+    endif ()
+endif ()
+
+if (ENABLE_CONAN)
+    target_link_libraries(${PACKAGE_NAME} PRIVATE ${3RDPARTY_LIBRARIES})
+    target_link_libraries(${PACKAGE_NAME} PRIVATE CONAN_PKG::Eigen3)
+    target_link_libraries(${PACKAGE_NAME} PRIVATE CONAN_PKG::flann)
+    target_link_libraries(${PACKAGE_NAME} PRIVATE CONAN_PKG::jsoncpp)
+    target_link_libraries(${PACKAGE_NAME} PRIVATE CONAN_PKG::libjpeg-turbo)
+    target_link_libraries(${PACKAGE_NAME} PRIVATE CONAN_PKG::libpng)
+    target_link_libraries(${PACKAGE_NAME} PRIVATE CONAN_PKG::lz4)
+    target_link_libraries(${PACKAGE_NAME} PRIVATE CONAN_PKG::lzf)
+    target_link_libraries(${PACKAGE_NAME} PRIVATE CONAN_PKG::qhull)
+    target_link_libraries(${PACKAGE_NAME} PRIVATE CONAN_PKG::rply)
+    target_link_libraries(${PACKAGE_NAME} PRIVATE CONAN_PKG::tritriintersect)
+endif ()
 
 target_link_libraries(${PACKAGE_NAME} PRIVATE ${CMAKE_PROJECT_NAME})
 if (${PYTHON_VERSION_MAJOR} EQUAL 2)

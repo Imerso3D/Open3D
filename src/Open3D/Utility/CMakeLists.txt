@@ -7,3 +7,10 @@ ShowAndAbortOnWarning(Utility)
 
 # Enforce 3rd party dependencies
 add_dependencies(Utility build_all_3rd_party_libs)
+
+if(ENABLE_CONAN)
+    target_link_libraries(Utility PUBLIC CONAN_PKG::Eigen3)
+    target_link_libraries(Utility PUBLIC CONAN_PKG::flann)
+    target_link_libraries(Utility PUBLIC CONAN_PKG::jsoncpp)
+    target_link_libraries(Utility PUBLIC CONAN_PKG::fmt)
+endif()

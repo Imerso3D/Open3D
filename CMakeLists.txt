@@ -27,6 +27,11 @@ string(CONCAT OPEN3D_VERSION "${OPEN3D_VERSION_MAJOR}"
 project(Open3D VERSION ${OPEN3D_VERSION})
 message(STATUS "Open3D ${PROJECT_VERSION}")
 
+if (ENABLE_CONAN)
+    include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
+    conan_basic_setup(TARGETS)
+endif ()
+
 # npm version has to be MAJOR.MINOR.PATCH
 string(CONCAT PROJECT_VERSION_THREE_NUMBER "${OPEN3D_VERSION_MAJOR}"
                                            ".${OPEN3D_VERSION_MINOR}"
@@ -70,6 +75,8 @@ option(ENABLE_HEADLESS_RENDERING "Use OSMesa for headless rendering"        OFF)
 option(BUILD_CPP_EXAMPLES        "Build the Open3D example programs"        ON)
 option(BUILD_UNIT_TESTS          "Build the Open3D unit tests"              OFF)
 option(BUILD_EIGEN3              "Use the Eigen3 that comes with Open3D"    ON)
+option(BUILD_FLANN               "Build flann from source"                  ON)
+option(BUILD_LZF                 "Build lzf from source"                    ON)
 option(BUILD_GLEW                "Build glew from source"                   OFF)
 option(BUILD_GLFW                "Build glfw from source"                   OFF)
 option(BUILD_JSONCPP             "Build json from source"                   OFF)
@@ -78,10 +85,18 @@ option(BUILD_PYBIND11            "Build pybind11 from source"               ON)
 option(BUILD_PYTHON_MODULE       "Build the python module"                  ON)
 option(BUILD_LIBREALSENSE        "Build support for Intel RealSense camera" OFF)
 option(BUILD_AZURE_KINECT        "Build support for Azure Kinect sensor"    OFF)
+option(BUILD_RPLY                "Build rply from source"                   ON)
 option(BUILD_TINYFILEDIALOGS     "Build tinyfiledialogs from source"        ON)
+option(BUILD_TRIINTERSECT        "Build TRIINTERSECT from source"           ON)
 option(BUILD_QHULL               "Build qhull from source"                  ON)
 option(ENABLE_JUPYTER            "Enable Jupyter support for Open3D"        ON)
 option(STATIC_WINDOWS_RUNTIME    "Use static (MT/MTd) Windows runtime"      OFF)
+option(BUILD_TOOLS               "Build the Open3D tools"                   ON)
+option(BUILD_VISUALIZATION       "Build the Open3D visualization module"    ON)
+option(BUILD_TINYGLTF            "Build tinygltf from source"               ON)
+option(BUILD_TINYOBJLOADER       "Build tinyobjloader from source"          ON)
+option(BUILD_FMT                 "Build fmt from source"                    ON)
+option(ENABLE_CONAN              "Enable conan"                             OFF)
 
 # default built type
 if (NOT CMAKE_BUILD_TYPE)
@@ -241,7 +256,6 @@ include_directories(
 # Suppress 3rdparty header warnings with SYSTEM
 include_directories(
     SYSTEM
-    ${PROJECT_SOURCE_DIR}/3rdparty
     ${3RDPARTY_INCLUDE_DIRS}
     ${PROJECT_SOURCE_DIR}/3rdparty/librealsense/include
 )

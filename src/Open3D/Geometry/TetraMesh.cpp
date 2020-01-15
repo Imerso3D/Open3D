@@ -400,7 +400,7 @@ std::shared_ptr<TriangleMesh> TetraMesh::ExtractTriangleMesh(
 
             triangle_mesh->triangles_.push_back(tri);
         } else if (4 == num_verts) {
-            std::array<int, 4> order;
+            std::array<int, 4> order{};
             if (HasCommonVertexIndex(keys[0], keys[1]) &&
                 HasCommonVertexIndex(keys[0], keys[2])) {
                 order = {1, 0, 2, 3};

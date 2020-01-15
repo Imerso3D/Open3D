@@ -40,3 +40,11 @@ ShowAndAbortOnWarning(Visualization)
 
 # Enforce 3rd party dependencies
 add_dependencies(Visualization build_all_3rd_party_libs)
+
+
+if(ENABLE_CONAN)
+    target_link_libraries(Visualization PUBLIC CONAN_PKG::Eigen3)
+    target_link_libraries(Visualization PUBLIC CONAN_PKG::fmt)
+    target_link_libraries(Visualization PUBLIC CONAN_PKG::jsoncpp)
+    target_link_libraries(Visualization PUBLIC CONAN_PKG::tinyfd)
+endif()

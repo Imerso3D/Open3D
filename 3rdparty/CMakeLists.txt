@@ -3,13 +3,13 @@ find_package(PkgConfig QUIET)
 find_package(OpenGL    QUIET)
 find_package(pybind11  QUIET)
 
-if (PKGCONFIG_FOUND)
+if (PKGCONFIG_FOUND AND NOT ENABLE_CONAN)
     pkg_search_module(EIGEN3    eigen3>=3.2.7   QUIET)
     pkg_search_module(GLFW      glfw3           QUIET)
     pkg_search_module(GLEW      glew            QUIET)
     pkg_search_module(JSONCPP   jsoncpp>=1.7.0  QUIET)
     pkg_search_module(PNG       libpng>=1.6.0   QUIET)
-endif (PKGCONFIG_FOUND)
+endif (PKGCONFIG_FOUND AND NOT ENABLE_CONAN)
 
 macro(INSTALL_HEADERS source)
     install(DIRECTORY   "${CMAKE_CURRENT_SOURCE_DIR}/${source}"
@@ -43,65 +43,71 @@ if (BUILD_EIGEN3)
 endif ()
 
 # flann
-Directories("${CMAKE_CURRENT_SOURCE_DIR}/flann"  flann_INCLUDE_DIRS)
-
-# GLEW
-if (BUILD_GLEW)
-    message(STATUS "Building GLEW from source (BUILD_GLEW=ON)")
-elseif (GLEW_FOUND)
-    message(STATUS "Using installed GLEW ${GLEW_VERSION}")
-else ()
-    message(STATUS "Unable to find GLEW installed in the system")
-    message(STATUS "Building GLEW from source")
-    set(BUILD_GLEW ON)
+if (BUILD_FLANN)
+    Directories("${CMAKE_CURRENT_SOURCE_DIR}/flann"  flann_INCLUDE_DIRS)
 endif ()
 
-if (BUILD_GLEW)
-    add_subdirectory(glew)
-    INSTALL_HEADERS(glew)
-endif ()
-
-# GLFW
-if (BUILD_GLFW)
-    message(STATUS "Building GLFW from source (BUILD_GLFW=ON)")
-elseif (GLFW_FOUND AND OPENGL_FOUND)
-    message(STATUS "Using installed GLFW ${GLFW_VERSION}")
-    if (APPLE)
-        find_library(COCOA_FRAMEWORK Cocoa)
-        find_library(IOKIT_FRAMEWORK IOKit)
-        find_library(CORE_FOUNDATION_FRAMEWORK CoreFoundation)
-        find_library(CORE_VIDEO_FRAMEWORK CoreVideo)
-        mark_as_advanced(COCOA_FRAMEWORK
-                         IOKIT_FRAMEWORK
-                         CORE_FOUNDATION_FRAMEWORK
-                         CORE_VIDEO_FRAMEWORK)
-        list(APPEND GLFW_LIBRARIES "${COCOA_FRAMEWORK}"
-                                    "${OPENGL_gl_LIBRARY}"
-                                    "${IOKIT_FRAMEWORK}"
-                                    "${CORE_FOUNDATION_FRAMEWORK}"
-                                    "${CORE_VIDEO_FRAMEWORK}")
+if (BUILD_VISUALIZATION)
+    # GLEW
+    if (BUILD_GLEW)
+        message(STATUS "Building GLEW from source (BUILD_GLEW=ON)")
+    elseif (GLEW_FOUND)
+        message(STATUS "Using installed GLEW ${GLEW_VERSION}")
     else ()
+        message(STATUS "Unable to find GLEW installed in the system")
+        message(STATUS "Building GLEW from source")
+        set(BUILD_GLEW ON)
+    endif ()
+
+    if (BUILD_GLEW)
+        add_subdirectory(glew)
+        INSTALL_HEADERS(glew)
+    endif ()
+
+    # GLFW
+    if (BUILD_GLFW)
+        message(STATUS "Building GLFW from source (BUILD_GLFW=ON)")
+    elseif (GLFW_FOUND AND OPENGL_FOUND)
+        message(STATUS "Using installed GLFW ${GLFW_VERSION}")
+        if (APPLE)
+            find_library(COCOA_FRAMEWORK Cocoa)
+            find_library(IOKIT_FRAMEWORK IOKit)
+            find_library(CORE_FOUNDATION_FRAMEWORK CoreFoundation)
+            find_library(CORE_VIDEO_FRAMEWORK CoreVideo)
+            mark_as_advanced(COCOA_FRAMEWORK
+                             IOKIT_FRAMEWORK
+                             CORE_FOUNDATION_FRAMEWORK
+                             CORE_VIDEO_FRAMEWORK)
+            list(APPEND GLFW_LIBRARIES "${COCOA_FRAMEWORK}"
+                                        "${OPENGL_gl_LIBRARY}"
+                                        "${IOKIT_FRAMEWORK}"
+                                        "${CORE_FOUNDATION_FRAMEWORK}"
+                                        "${CORE_VIDEO_FRAMEWORK}")
+        else ()
+            list(APPEND GLFW_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
+            list(APPEND GLFW_LIBRARIES    ${OPENGL_gl_LIBRARY})
+        endif ()
+    else ()
+        message(STATUS "Unable to find GLFW installed in the system")
+        message(STATUS "Building GLFW from source")
+        set(BUILD_GLFW ON)
+        # Notify PARENT_SCOPE that GLFW was built, to deal with glfw(3) naming issue
+        set(BUILD_GLFW ON PARENT_SCOPE)
+    endif ()
+
+    if (BUILD_GLFW)
+        add_subdirectory(GLFW)
+        INSTALL_HEADERS(GLFW)
         list(APPEND GLFW_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
         list(APPEND GLFW_LIBRARIES    ${OPENGL_gl_LIBRARY})
     endif ()
-else ()
-    message(STATUS "Unable to find GLFW installed in the system")
-    message(STATUS "Building GLFW from source")
-    set(BUILD_GLFW ON)
-    # Notify PARENT_SCOPE that GLFW was built, to deal with glfw(3) naming issue
-    set(BUILD_GLFW ON PARENT_SCOPE)
-endif ()
-
-if (BUILD_GLFW)
-    add_subdirectory(GLFW)
-    INSTALL_HEADERS(GLFW)
-    list(APPEND GLFW_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
-    list(APPEND GLFW_LIBRARIES    ${OPENGL_gl_LIBRARY})
 endif ()
 
 # JPEG
-message(STATUS "Building libjpeg-turbo from source")
-include(libjpeg-turbo/libjpeg-turbo.cmake)
+if (BUILD_JPEG)
+    message(STATUS "Building libjpeg-turbo from source")
+    include(libjpeg-turbo/libjpeg-turbo.cmake)
+endif ()
 
 # Azure Kinect
 include(azure_kinect/azure_kinect.cmake)
@@ -133,10 +139,14 @@ else ()
 endif ()
 
 # liblzf
-Directories("${CMAKE_CURRENT_SOURCE_DIR}/liblzf" liblzf_INCLUDE_DIRS)
+if (BUILD_LZF)
+    Directories("${CMAKE_CURRENT_SOURCE_DIR}/liblzf" liblzf_INCLUDE_DIRS)
+endif ()
 
 # tritriintersect
-Directories("${CMAKE_CURRENT_SOURCE_DIR}/tomasakeninemoeller" tomasakeninemoeller_INCLUDE_DIRS)
+if (BUILD_TRIINTERSECT)
+    Directories("${CMAKE_CURRENT_SOURCE_DIR}/tomasakeninemoeller" tomasakeninemoeller_INCLUDE_DIRS)
+endif ()
 
 # PNG
 if (BUILD_PNG)
@@ -186,27 +196,36 @@ if (BUILD_TINYFILEDIALOGS)
     set(tinyfiledialogs_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/tinyfiledialogs")
     set(tinyfiledialogs_LIBRARIES tinyfiledialogs)
 else ()
-    message(SEND_ERROR "TINYFILEDIALOGS dependency not met.")
+    if (NOT ENABLE_CONAN)
+        message(SEND_ERROR "TINYFILEDIALOGS dependency not met.")
+    endif ()
 endif ()
 
+
 # tinygltf
-Directories("${CMAKE_CURRENT_SOURCE_DIR}/tinygltf" tinygltf_INCLUDE_DIRS)
+if (BUILD_TINYGLTF)
+    Directories("${CMAKE_CURRENT_SOURCE_DIR}/tinygltf" tinygltf_INCLUDE_DIRS)
+endif ()
 
 # tinyobjloader
-message(STATUS "Building tinyobjloader from source")
-include_directories("tinyobjloader/")
-add_library(tinyobjloader STATIC tinyobjloader/tiny_obj_loader.cc)
-if (NOT BUILD_SHARED_LIBS)
-  install(TARGETS tinyobjloader
-        RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
-        LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-endif()
-set(tinyobjloader_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/tinyobjloader")
-set(tinyobjloader_LIBRARIES tinyobjloader)
+if (BUILD_TINYOBJLOADER)
+    message(STATUS "Building tinyobjloader from source")
+    include_directories("tinyobjloader/")
+    add_library(tinyobjloader STATIC tinyobjloader/tiny_obj_loader.cc)
+    if (NOT BUILD_SHARED_LIBS)
+      install(TARGETS tinyobjloader
+            RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+            LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
+    endif()
+    set(tinyobjloader_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/tinyobjloader")
+    set(tinyobjloader_LIBRARIES tinyobjloader)
+endif ()
 
 # rply
-Directories("${CMAKE_CURRENT_SOURCE_DIR}/rply"   rply_INCLUDE_DIRS)
+if (BUILD_RPLY)
+    Directories("${CMAKE_CURRENT_SOURCE_DIR}/rply"   rply_INCLUDE_DIRS)
+endif ()
 
 # qhull
 if (BUILD_QHULL)
@@ -267,7 +286,9 @@ if (BUILD_QHULL)
     set(qhull_INCLUDE_DIRS "${CMAKE_CURRENT_SOURCE_DIR}/qhull/src")
     set(qhull_LIBRARIES qhullcpp qhullstatic_r)
 else ()
-    message(SEND_ERROR "qhull dependency not met.")
+    if (NOT ENABLE_CONAN)
+        message(SEND_ERROR "qhull dependency not met.")
+    endif ()
 endif ()
 
 # googletest
@@ -294,9 +315,12 @@ if (BUILD_UNIT_TESTS)
     set(googletest_LIBRARIES googletest)
 endif()
 
-# fmt library
-set(fmt_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/fmt/include)
-INSTALL_HEADERS(fmt)
+if (BUILD_FMT)
+    # fmt library
+    set(fmt_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/fmt/include)
+    INSTALL_HEADERS(fmt)
+endif ()
+
 
 list(APPEND 3RDPARTY_INCLUDE_DIRS
      # ${dirent_INCLUDE_DIRS} # fails on Linux, seems to require Windows headers

@@ -4,6 +4,6 @@ if (BUILD_CPP_EXAMPLES)
 endif ()
 
 # Python examples
-if (BUILD_PYTHON_MODULE)
+if (BUILD_PYTHON_MODULE AND NOT ENABLE_CONAN)
     add_subdirectory(Python)
 endif ()

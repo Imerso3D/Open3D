@@ -13,7 +13,10 @@ add_subdirectory(Odometry)
 add_subdirectory(Registration)
 add_subdirectory(Utility)
 add_subdirectory(IO)
-add_subdirectory(Visualization)
+
+if(BUILD_VISUALIZATION)
+    add_subdirectory(Visualization)
+endif ()
 
 # Source group for Visual Studio
 ADD_SOURCE_GROUP(Camera)
@@ -24,7 +27,11 @@ ADD_SOURCE_GROUP(Odometry)
 ADD_SOURCE_GROUP(Registration)
 ADD_SOURCE_GROUP(Utility)
 ADD_SOURCE_GROUP(IO)
-ADD_SOURCE_GROUP(Visualization)
+
+
+if(BUILD_VISUALIZATION)
+    ADD_SOURCE_GROUP(Visualization)
+endif ()
 
 # Install headers
 install(DIRECTORY   "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -47,19 +54,28 @@ add_library(${CMAKE_PROJECT_NAME}
     $<TARGET_OBJECTS:Registration>
     $<TARGET_OBJECTS:Utility>
     $<TARGET_OBJECTS:IO>
-    $<TARGET_OBJECTS:Visualization>
 )
 ShowAndAbortOnWarning(${CMAKE_PROJECT_NAME})
 
-# headless rendering
-if (ENABLE_HEADLESS_RENDERING)
-    find_package(OSMesa REQUIRED)
-    include_directories(${OSMESA_INCLUDE_DIR})
-    target_link_libraries(${CMAKE_PROJECT_NAME} ${OSMESA_LIBRARY})
-else ()
-    find_package(OpenGL REQUIRED)
-    target_link_libraries(${CMAKE_PROJECT_NAME} ${OPENGL_LIBRARIES})
+if(BUILD_VISUALIZATION)
+    target_sources(${CMAKE_PROJECT_NAME} PRIVATE $<TARGET_OBJECTS:Visualization>)
+
+    # headless rendering
+    if (ENABLE_HEADLESS_RENDERING)
+        find_package(OSMesa REQUIRED)
+        include_directories(${OSMESA_INCLUDE_DIR})
+        target_link_libraries(${CMAKE_PROJECT_NAME} ${OSMESA_LIBRARY})
+    else ()
+        find_package(OpenGL REQUIRED)
+        target_link_libraries(${CMAKE_PROJECT_NAME} ${OPENGL_LIBRARIES})
+    endif ()
 endif ()
+
+
+if (ENABLE_CONAN)
+    target_link_libraries(${CMAKE_PROJECT_NAME} CONAN_PKG::Eigen3)
+    target_link_libraries(${CMAKE_PROJECT_NAME} CONAN_PKG::fmt)
+endif()
 
 target_link_libraries(${CMAKE_PROJECT_NAME}
                       ${3RDPARTY_LIBRARIES}
