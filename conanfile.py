@@ -3,7 +3,7 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.tools import os_info, SystemPackageTool
 
-class TinyobjloaderConan(ConanFile):
+class Open3DConan(ConanFile):
     version = "0.8.0"
 
     name = "open3d"
@@ -33,7 +33,7 @@ class TinyobjloaderConan(ConanFile):
         "lzf/3.6.0@imerso/master",
         "jsoncpp/1.9.0@theirix/stable",
         "libjpeg-turbo/2.0.2@bincrafters/stable",
-        "qhull/7.3.2@imerso/master",
+        "qhull/7.3.0@imerso/master",
         "libpng/1.6.34@bincrafters/stable",
         "flann/1.9.1@imerso/master",
         "tinyobjloader/2.0.0-rc1@imerso/master",
