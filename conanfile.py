@@ -33,7 +33,6 @@ class Open3DConan(ConanFile):
         "lzf/3.6.0@imerso/master",
         "jsoncpp/1.9.0@theirix/stable",
         "libjpeg-turbo/2.0.2@bincrafters/stable",
-        "qhull/7.3.0@imerso/master",
         "libpng/1.6.34@bincrafters/stable",
         "flann/1.9.1@imerso/master",
         "tinyobjloader/2.0.0-rc1@imerso/master",
@@ -115,7 +114,7 @@ class Open3DConan(ConanFile):
         cmake.definitions["BUILD_PNG"] = False
         cmake.definitions["BUILD_PYBIND11"] = False
         cmake.definitions["BUILD_PYBIND11"] = False
-        cmake.definitions["BUILD_QHULL"] = False
+        cmake.definitions["BUILD_QHULL"] = True
         cmake.definitions["BUILD_TINYOBJLOADER"] = False
         cmake.definitions["BUILD_RPLY"] = False
         cmake.definitions["BUILD_TINYFILEDIALOGS"] = False
@@ -131,7 +130,6 @@ class Open3DConan(ConanFile):
         cmake.definitions["PNG_FOUND"] = True
         cmake.definitions["PYBIND11_FOUND"] = True
         cmake.definitions["PYBIND11_FOUND"] = True
-        cmake.definitions["QHULL_FOUND"] = True
         cmake.definitions["TINYFILEDIALOGS_FOUND"] = True
 
         # Open3d targets
