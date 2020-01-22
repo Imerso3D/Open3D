@@ -188,3 +188,6 @@ class TinyobjloaderConan(ConanFile):
                     self.settings.build_type.value,
                 )
             )
+
+        if self.settings.compiler == "gcc":
+            self.cpp_info.libs.append("gomp")
