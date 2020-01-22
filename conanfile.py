@@ -4,7 +4,7 @@ from conans import ConanFile, CMake, tools
 from conans.tools import os_info, SystemPackageTool
 
 
-class TinyobjloaderConan(ConanFile):
+class Open3DConan(ConanFile):
     version = "0.8.0"
 
     name = "open3d"
