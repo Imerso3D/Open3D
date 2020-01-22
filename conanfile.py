@@ -3,6 +3,7 @@ import os
 from conans import ConanFile, CMake, tools
 from conans.tools import os_info, SystemPackageTool
 
+
 class TinyobjloaderConan(ConanFile):
     version = "0.8.0"
 
@@ -25,7 +26,6 @@ class TinyobjloaderConan(ConanFile):
         "!test",
     )
 
-
     requires = (
         "eigen/3.3.7@conan/stable",
         "tritriintersect/0.1.0@imerso/master",
@@ -39,7 +39,7 @@ class TinyobjloaderConan(ConanFile):
         "tinyobjloader/2.0.0-rc1@imerso/master",
         "fmt/5.3.0@bincrafters/stable",
         "tinygltf/2.2.0@imerso/master",
-        )
+    )
 
     options = {
         "fPIC": [True, False],
@@ -47,7 +47,7 @@ class TinyobjloaderConan(ConanFile):
         "with_visualization": [True, False],
         "with_headless_rendering": [True, False],
         "with_python": [True, False],
-        }
+    }
 
     default_options = {
         "fPIC": True,
@@ -57,7 +57,6 @@ class TinyobjloaderConan(ConanFile):
         "with_python": False,
     }
 
-
     @property
     def _source_subfolder(self):
         return "."
@@ -65,7 +64,7 @@ class TinyobjloaderConan(ConanFile):
     def system_requirements(self):
         installer = SystemPackageTool()
 
-        if os_info.linux_distro == "ubuntu" and self.settings.compiler == 'clang':
+        if os_info.linux_distro == "ubuntu" and self.settings.compiler == "clang":
             installer.install("libomp-dev")
 
         if self.options.with_visualization:
@@ -89,8 +88,6 @@ class TinyobjloaderConan(ConanFile):
             self.requires("pybind11/2.3.0@conan/stable")
             self.requires("tinyfd/3.4.1@imerso/master")
             self.requires("lz4/1.8.3@bincrafters/stable")
-
-
 
     def configure_cmake(self):
         cmake = CMake(self)
@@ -153,7 +150,6 @@ class TinyobjloaderConan(ConanFile):
         if self.options.with_headless_rendering:
             cmake.definitions["ENABLE_HEADLESS_RENDERING"] = True
 
-
         if self.options.with_python:
             if not (self.options.with_visualization):
                 raise Exception("Need with_visualization when using with_python")
@@ -173,9 +169,10 @@ class TinyobjloaderConan(ConanFile):
         cmake.install()
 
         if self.options.with_python:
-            self.copy("*open3d*python*.so", dst="python_package/open3d", keep_path=False)
+            self.copy(
+                "*open3d*python*.so", dst="python_package/open3d", keep_path=False
+            )
             self.copy("*open3d/*.py", dst="python_package/open3d", keep_path=False)
-
 
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
