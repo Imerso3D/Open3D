@@ -177,9 +177,12 @@ class TinyobjloaderConan(ConanFile):
     def package_info(self):
         self.cpp_info.libs = tools.collect_libs(self)
 
-        self.env_info.PYTHONPATH.append(os.path.join(self.package_folder,"python_package"))
+        if self.options.with_python:
+            self.env_info.PYTHONPATH.append(
+                os.path.join(self.package_folder, "python_package")
+            )
 
-        if not self.in_local_cache:
+        if self.options.with_python and not self.in_local_cache:
             self.env_info.PYTHONPATH.append(
                 os.path.join(
                     self.package_folder,
